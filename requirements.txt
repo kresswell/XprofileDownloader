@@ -1,4 +1,6 @@
 playwright>=1.40
 loguru>=0.7
+telethon>=1.36
+python-dotenv>=1.0
 yt-dlp # OR  sudo apt install yt-dlp
 # playwright install chromium

@@ -3,6 +3,9 @@ cookies.txt
 *cookies*.txt
 !cookies.txt.example
 .env
+*.session
+*.session-journal
+xscraper.session*
 # Outputs
 *_downloads/
 *.mp4

@@ -28,6 +28,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--cookies", dest="cookies_file", default=None, help="path to Netscape cookies.txt")
     p.add_argument("--headful", action="store_true", help="show browser window")
+    p.add_argument("--to-telegram", action="store_true", help="upload downloads to Telegram via Telethon")
+    p.add_argument("--tg-target", default=None, help="Telegram target: 'me', @user, chat id (or TG_TARGET)")
+    p.add_argument("--tg-session", default=None, help="Telethon session name/path (or TG_SESSION, default xscraper)")
+    p.add_argument("--tg-clean", action="store_true", help="delete local files after Telegram upload")
+    p.add_argument("--tg-mode", default=None, choices=["userbot", "bot"], help="Telegram mode (or TG_MODE)")
+    p.add_argument("--tg-bot-token", default=None, help="Bot token for bot mode (or TG_BOT_TOKEN)")
+    p.add_argument("--env-file", default=None, help="path to .env (default ./.env)")
     return p
 
 
@@ -49,7 +56,20 @@ def run_config(cfg: ScraperConfig) -> int:
         print(f"[{post.kind}] {post.url}")
     if cfg.out:
         export_links(posts, cfg.out)
-    if cfg.dl_dir:
+    if cfg.to_telegram:
+        from xscraper.storage.telegram import TelegramStorage, telegram_config_from_env
+
+        staging = cfg.dl_dir or Path(f"{cfg.handle}_telegram_staging")
+        tg = telegram_config_from_env(
+            target=cfg.tg_target,
+            session=cfg.tg_session,
+            keep_files=cfg.tg_keep_files,
+            mode=cfg.tg_mode,
+            bot_token=cfg.tg_bot_token,
+        )
+        tstorage = TelegramStorage(tg=tg, dl=DownloadConfig(dl_dir=staging), handle=cfg.handle)
+        tstorage.store(posts)
+    elif cfg.dl_dir:
         storage = LocalStorage(DownloadConfig(dl_dir=cfg.dl_dir))
         res = storage.store(posts)
         logger.success(f"Downloads -> {cfg.dl_dir}: {res.ok} ok, {res.failed} failed.")
@@ -58,6 +78,9 @@ def run_config(cfg: ScraperConfig) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    from xscraper.env import load_env
+
+    load_env(args.env_file)  # .env -> env, real env wins
     resolved = args.cookies_file or resolve_cookies_file()
     if args.dl_dir and args.dl_dir != "" and args.dl_dir != "download":
         dl_dir = Path(args.dl_dir)
@@ -75,6 +98,12 @@ def main(argv: list[str] | None = None) -> int:
         dl_dir=dl_dir,
         cookies_file=Path(resolved) if resolved else None,
         headless=not args.headful,
+        to_telegram=args.to_telegram,
+        tg_target=args.tg_target,
+        tg_session=Path(args.tg_session) if args.tg_session else None,
+        tg_keep_files=not args.tg_clean,
+        tg_mode=args.tg_mode,
+        tg_bot_token=args.tg_bot_token,
     )
     # Friendly hint when cookies are missing entirely.
     if cfg.cookies_file is None:
