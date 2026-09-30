@@ -1,0 +1,4 @@
+playwright>=1.40
+loguru>=0.7
+yt-dlp # OR  sudo apt install yt-dlp
+# playwright install chromium

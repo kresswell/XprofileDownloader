@@ -1,0 +1,8 @@
+# Netscape HTTP Cookie File
+# Export with a browser extension ("Get cookies.txt LOCALLY" for Chrome/Firefox)
+# while logged into x.com, save as cookies.txt next to main.py (chmod 600).
+# Then run: python main.py <handle> --cookies ./cookies.txt
+# Or set env: export X_COOKIES_FILE=~/cookies.txt
+#
+# .x.com	TRUE	/	TRUE	0	auth_token	YOUR_VALUE_HERE
+# .x.com	TRUE	/	TRUE	0	ct0	YOUR_VALUE_HERE

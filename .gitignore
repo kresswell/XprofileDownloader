@@ -1,0 +1,12 @@
+# Secrets - never commit real cookies
+cookies.txt
+*cookies*.txt
+!cookies.txt.example
+.env
+# Outputs
+*_downloads/
+*.mp4
+*.jpg
+*.png
+*.webp
+__pycache__/
